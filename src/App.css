@@ -1,0 +1,7 @@
+/* Reseta margens padrões do navegador */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+}
