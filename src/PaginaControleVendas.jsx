@@ -2,20 +2,22 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaControleVendas.css'
 
-// Cardápio de referência para sabermos o nome do sabor pelo ID
+// Cardápio de referência sincronizado com a PaginaCliente
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos' },
   { id: 2, sabor: 'Frango' },
   { id: 3, sabor: 'Marguerita' },
-  { id: 4, sabor: 'Presunto e Queijo' },
-  { id: 5, sabor: 'Calabresa' }
+  { id: 4, sabor: 'Milho' },
+  { id: 5, sabor: 'Presunto e Queijo' },
+  { id: 6, sabor: 'Calabresa' }
 ]
 
 export default function PaginaControleVendas() {
   const [pedidos, setPedidos] = useState([])
   const [carregando, setCarregando] = useState(true)
+  const [busca, setBusca] = useState('') // 🌟 1. ESTADO PARA A BUSCA
 
-  // 1. BUSCAR PEDIDOS E SEUS DETALHES RELACIONADOS
+  // BUSCAR PEDIDOS E SEUS DETALHES RELACIONADOS
   async function buscarPedidos() {
     setCarregando(true)
     
@@ -29,7 +31,7 @@ export default function PaginaControleVendas() {
         clientes ( nome, telefone, vendedor ),
         itens_pedido ( quantidade, pizza_id )
       `)
-      .order('criado_em', { ascending: false }) // Mais recentes no topo
+      .order('criado_em', { ascending: false })
 
     if (error) {
       console.error('Erro ao buscar vendas:', error.message)
@@ -42,7 +44,6 @@ export default function PaginaControleVendas() {
   useEffect(() => {
     buscarPedidos()
 
-    // 2. ESCUTA EM TEMPO REAL (Se entrar pedido novo, a tela atualiza sozinha)
     const canal = supabase
       .channel('controle-vendas-realtime')
       .on('postgres_changes', { event: '*', pattern: 'public', table: 'pedidos' }, () => {
@@ -55,7 +56,7 @@ export default function PaginaControleVendas() {
     }
   }, [])
 
-  // 3. ALTERAR STATUS DA PRODUÇÃO/VENDA
+  // ALTERAR STATUS DA PRODUÇÃO/VENDA
   async function alterarStatus(pedidoId, novoStatus) {
     const { error } = await supabase
       .from('pedidos')
@@ -69,13 +70,18 @@ export default function PaginaControleVendas() {
     }
   }
 
-  // 4. AUXILIAR: Encontra o nome do sabor usando o pizza_id vindo do banco
   const obterNomeSabor = (pizzaId) => {
     const pizza = CARDAPIO_PIZZAS.find(p => p.id === pizzaId)
     return pizza ? pizza.sabor : `Sabor #${pizzaId}`
   }
 
-  // 5. FATURAMENTO TOTAL ACUMULADO
+  // 🌟 2. FILTRAGEM DINÂMICA PELO NOME DO CLIENTE
+  const pedidosFiltrados = pedidos.filter(pedido => {
+    const nomeCliente = pedido.clientes?.nome?.toLowerCase() || ''
+    return nomeCliente.includes(busca.toLowerCase())
+  })
+
+  // FATURAMENTO TOTAL ACUMULADO (Baseado apenas nos pedidos filtrados ou no total geral, aqui mantido sobre o total geral)
   const faturamentoTotal = pedidos.reduce((acc, p) => acc + Number(p.total), 0)
 
   if (carregando) return <div className="controle-loading">Carregando Controle de Vendas... 📈</div>
@@ -95,13 +101,33 @@ export default function PaginaControleVendas() {
           <span>Total de {pedidos.length} pedidos finalizados ou em andamento</span>
         </div>
 
+        {/* 🌟 3. CAMPO VISUAL DE BUSCA PELO NOME */}
+        <div className="busca-container" style={{ marginBottom: '25px' }}>
+          <input
+            type="text"
+            placeholder="🔍 Procurar pedido pelo nome do cliente..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              fontSize: '1rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
         <h2>Fluxo de Pedidos Ativos</h2>
 
-        {pedidos.length === 0 ? (
-          <p className="sem-vendas">Nenhuma venda registrada até o momento. 😴</p>
+        {pedidosFiltrados.length === 0 ? (
+          <p className="sem-vendas">Nenhum pedido encontrado para esta busca. 🔎</p>
         ) : (
           <div className="grid-vendas">
-            {pedidos.map(pedido => (
+            {pedidosFiltrados.map(pedido => (
               <div key={pedido.id} className={`card-venda status-${pedido.status.toLowerCase().replace(' ', '-')}`}>
                 <div className="venda-header">
                   <span className="venda-id">Pedido #{pedido.id}</span>
@@ -110,10 +136,8 @@ export default function PaginaControleVendas() {
 
                 <div className="venda-corpo">
                   <p><strong>Cliente:</strong> {pedido.clientes?.nome || 'Não informado'}</p>
-                  <p><strong>Telefone:</strong> {pedido.clientes?.telefone || 'Não informado'}</p>
                   <p><strong>Vendedor:</strong> {pedido.clientes?.vendedor || 'Não informado'}</p>
                   
-                  {/* EXIBIÇÃO DOS SABORES ESCOLHIDOS */}
                   <div className="venda-sabores">
                     <strong>Pizzas Escolhidas:</strong>
                     <ul>
@@ -130,16 +154,48 @@ export default function PaginaControleVendas() {
                   <span className="venda-total">R$ {Number(pedido.total).toFixed(2)}</span>
                   
                   <div className="venda-acoes">
+                    {/* Passo 1: O pedido chegou */}
                     {pedido.status === 'Recebido' && (
-                      <button onClick={() => alterarStatus(pedido.id, 'Em Preparo')} className="btn-controle preparo">👨‍🍳 Preparar</button>
+                      <button onClick={() => alterarStatus(pedido.id, 'Em Processo')} className="btn-controle preparo">
+                        👨‍🍳 Em processo
+                      </button>
                     )}
+                    
+                    {/* Passo 2: O pedido está sendo feito e agora ficou pronto na cozinha */}
                     {pedido.status === 'Em Preparo' && (
-                      <button onClick={() => alterarStatus(pedido.id, 'Finalizado')} className="btn-controle pronto">✅ Finalizar</button>
+                      <button onClick={() => alterarStatus(pedido.id, 'Pronto para Entrega')} className="btn-controle pronto">
+                        📦 Em andamento
+                      </button>
                     )}
+                    
+                    {/* Passo 3: O NOVO BOTÃO - O motoboy ou atendente entregou o pedido */}
+                    {pedido.status === 'Pronto para Entrega' && (
+                      <button 
+                        onClick={() => alterarStatus(pedido.id, 'Finalizado')} 
+                        className="btn-controle"
+                        style={{
+                          backgroundColor: '#27ae60',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '8px 14px',
+                          fontWeight: '600',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🛵Entregue
+                      </button>
+                    )}
+                    
+                    {/* Passo 4: Fim do fluxo */}
                     {pedido.status === 'Finalizado' && (
-                      <span className="venda-concluida">Pronto / Entregue 🛵</span>
+                      <span className="venda-concluida" style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                        Entregue / Concluído 🎉
+                      </span>
                     )}
                   </div>
+
                 </div>
               </div>
             ))}

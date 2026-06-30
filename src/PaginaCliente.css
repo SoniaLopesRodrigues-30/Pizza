@@ -121,3 +121,14 @@ body, html, #root {
   display: block;
   margin: 0 auto 10px auto; /* Centraliza a logo e joga o texto um pouco para baixo */
 }
+.img-folder {
+  width: 65%; /* Reduzi de 100% para 65% para o anúncio ficar menor */
+  max-height: 300px; /* Diminuí a altura máxima de 450px para 320px */
+  object-fit: contain; 
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin: 0 auto; /* Garante que a imagem continue centralizada */
+  display: block;
+}
+

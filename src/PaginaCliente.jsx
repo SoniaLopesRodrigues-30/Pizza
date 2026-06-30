@@ -108,8 +108,7 @@ export default function PaginaCliente() {
 
       {/* 🌟 NOVO BLOCO DO FOLDER DE ANÚNCIO */}
       <div className="folder-anuncio-container">
-        <div className="folder-card">
-          <span className="folder-badge">📢 Informações Importantes</span>
+        <div className="folder-card">          
           <img 
             src="/anuncio.png" 
             alt="Cartaz de Vendas Pizza Solidária" 
@@ -130,12 +129,7 @@ export default function PaginaCliente() {
               <input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Digite seu nome aqui!" required />
             </div>            
 
-            {/* CAMPO DE TELEFONE ADICIONADO AQUI (Evita o erro de NOT NULL do banco) */}
-            <div className="input-group">
-              <label>Telefone / WhatsApp:</label>
-              <input type="tel" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(00) 00000-0000" required />
-            </div>            
-
+            
             <div className="input-group">
               <label>Vendedor responsável:</label>
               <select 

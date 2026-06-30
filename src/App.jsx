@@ -2,6 +2,7 @@ import { useState } from 'react'
 import PaginaCliente from './PaginaCliente.jsx'
 import PaginaControleVendas from './PaginaControleVendas'
 
+
 export default function App() {
   const [telaAtiva, setTelaAtiva] = useState('cliente')
 
@@ -50,7 +51,7 @@ export default function App() {
             transition: 'background 0.2s'
           }}
         >
-          🍕 Frente de Loja (Cliente)
+          🍕 Dados do Pedido (Cliente)
         </button>
 
         {telaAtiva === 'admin' ? (
