@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaCliente.css'
-import logoCentro from '/logoCentro.png' 
+
 
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos', preco: 35.00 },

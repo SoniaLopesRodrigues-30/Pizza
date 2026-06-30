@@ -1,4 +1,5 @@
 {
-  "buildCommand": "cmd /c \"set CI=false&& npm run build\"",
-  "outputDirectory": "dist"
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

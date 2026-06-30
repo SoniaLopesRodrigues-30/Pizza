@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaControleVendas.css'
 
+
 // Cardápio de referência sincronizado com a PaginaCliente
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos' },
