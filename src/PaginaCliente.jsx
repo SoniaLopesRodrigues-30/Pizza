@@ -9,17 +9,15 @@ const CARDAPIO_PIZZAS = [
   { id: 4, sabor: 'Milho', preco: 35.00 },
   { id: 5, sabor: 'Presunto e Queijo', preco: 35.00 },
   { id: 6, sabor: 'Calabresa', preco: 35.00 }
- 
 ]
 
 // 1. LISTA FIXA DE VENDEDORES (Edite ou adicione nomes aqui)
-const VENDEDORES = ['Ângela', 'Adriana (Drica)', 'Katia', 'Nega','Sônia']
+const VENDEDORES = ['Adriana (Drica)','Ângela',  'Katia', 'Nega', 'Rose','Sérgio','Sônia','Suelena' ]
 
 export default function PaginaCliente() {
   const [nome, setNome] = useState('')
   const [telefone, setTelefone] = useState('')
-  const [vendedor, setVendedor] = useState('') // Começa vazio para forçar a escolha
-  
+  const [vendedor, setVendedor] = useState('') // Começa vazio para forçar a escolha  
   const [quantidades, setQuantidades] = useState(
     CARDAPIO_PIZZAS.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {})
   )
@@ -36,7 +34,7 @@ export default function PaginaCliente() {
   const precoUnitarioAtual = totalItens >= 4 ? 32.50 : 35.00
   const valorTotalExibicao = totalItens * precoUnitarioAtual
 
-  async function EnviarPedidoCliente(e) {
+    async function EnviarPedidoCliente(e) {
     e.preventDefault()
     
     const itensSelecionados = CARDAPIO_PIZZAS
@@ -52,27 +50,34 @@ export default function PaginaCliente() {
       return alert('Por favor, adicione pelo menos 1 pizza ao seu pedido!')
     }
 
-    if (!nome || !telefone || !vendedor) {
-      return alert('Por favor, preencha o Nome, Telefone e selecione um Vendedor!')
+    if (!nome || !vendedor ) {
+      return alert('Por favor, preencha todos os campos de identificação!')
     }
 
     const valorTotalBanco = itensSelecionados.reduce((acc, item) => acc + (item.preco_unitario * item.quantidade), 0)
 
-    const { data: cliente, error: errC } = await supabase
-  .from('clientes')
-  .insert([{ nome, telefone: telefone, vendedor }]) // <-- Troque 'telephone' por 'telefone' aqui!
-  .select()
-  .single()
-    if (errC) return alert('Erro ao salvar os dados: ' + errC.message)
+    // 1. Salva o Cliente incluindo o campo telefone
+    const { data: clienteData, error: errC } = await supabase
+      .from('clientes')
+      .insert([{ nome, vendedor, telefone }]) // Campo adicionado aqui
+      .select(); 
+    if (errC) return alert('Erro ao salvar os dados: ' + errC.message);
+    if (!clienteData || clienteData.length === 0) return alert('Erro: Cliente não foi retornado pelo banco.');
+    
+    const cliente = clienteData[0]; 
 
-    const { data: pedido, error: errP } = await supabase
+    // 2. Salva o Pedido
+    const { data: pedidoData, error: errP } = await supabase
       .from('pedidos')
       .insert([{ cliente_id: cliente.id, total: valorTotalBanco, status: 'Recebido' }])
-      .select()
-      .single()
-      
-    if (errP) return alert('Erro ao criar pedido: ' + errP.message)
+      .select();
 
+    if (errP) return alert('Erro ao criar pedido: ' + errP.message);
+    if (!pedidoData || pedidoData.length === 0) return alert('Erro: Pedido não foi retornado pelo banco.');
+
+    const pedido = pedidoData[0];
+
+    // 3. Insere os itens
     const itensParaInserir = itensSelecionados.map(item => ({
       pedido_id: pedido.id,
       pizza_id: item.pizza_id,
@@ -87,11 +92,12 @@ export default function PaginaCliente() {
 
     alert('🍕 Pedido cadastrado com sucesso!')
     
-    setNome('')
-    setTelefone('')
-    setVendedor('') // Limpa a seleção após salvar
+    setNome('')    
+    setTelefone('') // Limpa o telefone
+    setVendedor('') 
     setQuantidades(CARDAPIO_PIZZAS.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {}))
-  }   
+  }
+
 
   return (
     <div className="cliente-page">
@@ -110,14 +116,8 @@ export default function PaginaCliente() {
             <div className="input-group">
               <label>Nome do Cliente:</label>
               <input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Digite seu nome aqui!" required />
-            </div>
+            </div>            
 
-            <div className="input-group">
-              <label>Telefone:</label>
-              <input type="tel" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(XX) XXXXX-XXXX" required />
-            </div>
-
-            {/* 2. NOVO CAMPO DE SELEÇÃO DE VENDEDOR */}
             <div className="input-group">
               <label>Vendedor responsável:</label>
               <select 
@@ -129,7 +129,7 @@ export default function PaginaCliente() {
                   border: '1px solid #cbd5e1',
                   borderRadius: '8px',
                   fontSize: '1rem',
-                  backgroundColor: '#white',
+                  backgroundColor: 'white',
                   cursor: 'pointer'
                 }}
               >
