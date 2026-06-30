@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaCliente.css'
+import logoCentro from '/logoCentro.png' 
 
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos', preco: 35.00 },
@@ -99,16 +100,27 @@ export default function PaginaCliente() {
   }
 
 
-  return (
+      return (
     <div className="cliente-page">
       <div className="banner-pizzaria">
-        <h1>🍕 Pizza Solidária- Recanto Espírita Nosso Lar</h1>
-        <p>Insira os dados e monte o pedido rapidamente</p>
+        <img src="/logoCentro.png" alt="Logo Pizza Solidária" className="logo-pizzaria" />              
+      </div>
+
+      {/* 🌟 NOVO BLOCO DO FOLDER DE ANÚNCIO */}
+      <div className="folder-anuncio-container">
+        <div className="folder-card">
+          <span className="folder-badge">📢 Informações Importantes</span>
+          <img 
+            src="/anuncio.png" 
+            alt="Cartaz de Vendas Pizza Solidária" 
+            className="img-folder" 
+          />
+          <p className="folder-legenda">Toque ou clique na imagem para ampliar se necessário.</p>
+        </div>
       </div>
 
       <div className="cliente-container">
-        <h2>Novo Pedido</h2>
-        
+        <h2>Novo Pedido</h2>        
         <form onSubmit={EnviarPedidoCliente} className="form-cliente">
           <div className="dados-entrega">
             <h3>Identificação:</h3>
@@ -116,6 +128,12 @@ export default function PaginaCliente() {
             <div className="input-group">
               <label>Nome do Cliente:</label>
               <input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Digite seu nome aqui!" required />
+            </div>            
+
+            {/* CAMPO DE TELEFONE ADICIONADO AQUI (Evita o erro de NOT NULL do banco) */}
+            <div className="input-group">
+              <label>Telefone / WhatsApp:</label>
+              <input type="tel" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="(00) 00000-0000" required />
             </div>            
 
             <div className="input-group">

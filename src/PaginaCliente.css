@@ -115,3 +115,9 @@ body, html, #root {
   margin-top: 10px;
 }
 .btn-enviar-pedido:hover { background-color: #27ae60; }
+.logo-pizzaria {
+  width: 300px; /* Reduza ou aumente este valor para controlar o tamanho */
+  height: auto; /* Mantém as proporções da imagem sem amassar */
+  display: block;
+  margin: 0 auto 10px auto; /* Centraliza a logo e joga o texto um pouco para baixo */
+}
