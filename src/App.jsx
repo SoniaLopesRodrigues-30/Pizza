@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import PaginaCliente from './PaginaCliente.jsx'
-import PaginaControleVendas from './PaginaControleVendas'
-
+import PaginaControleVendas from './PaginaControleVendas.jsx'
+import PaginaRelatorioVendas from './PaginaRelatorioVendas.jsx' 
 
 export default function App() {
-  const [telaAtiva, setTelaAtiva] = useState('cliente')
+  const [telaAtiva, setTelaAtiva] = useState('relatorio')
 
-  // 1. CONFISSÃO DA SUA SENHA: Mude para a senha que você preferir usar na pizzaria
   const SENHA_ADMIN = 'pizza123'
 
   // Função que valida o acesso por senha
@@ -14,13 +13,13 @@ export default function App() {
     const senhaDigitada = prompt('🔒 Acesso Restrito! Digite a senha de administrador:')
     
     if (senhaDigitada === SENHA_ADMIN) {
-      setTelaAtiva('admin')
+      setTelaAtiva('admin') // Entra direto no controle de vendas
     } else if (senhaDigitada !== null) {
       alert('❌ Senha inválida! Acesso negado.')
     }
   }
 
-  // Função para deslogar do painel de vendas por segurança
+  // Função para deslogar de qualquer painel administrativo por segurança
   const fecharPainelAdmin = () => {
     setTelaAtiva('cliente')
   }
@@ -35,7 +34,8 @@ export default function App() {
         gap: '15px',
         padding: '15px',
         backgroundColor: '#2c3e50',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        flexWrap: 'wrap' // Garante que fique bom em telas menores
       }}>
         <button 
           onClick={fecharPainelAdmin}
@@ -54,26 +54,62 @@ export default function App() {
           🍕 Dados do Pedido (Cliente)
         </button>
 
-        {telaAtiva === 'admin' ? (
-          // SE O GERENTE JÁ ESTIVER LOGADO, MOSTRA O BOTÃO DE SAIR/TRANCAR
-          <button 
-            onClick={fecharPainelAdmin}
-            style={{
-              padding: '10px 20px',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: '#d35400',
-              color: 'white',
-              transition: 'background 0.2s'
-            }}
-          >
-            🔒 Sair e Trancar Painel
-          </button>
+        {/* 🌟 2. SE ESTIVER LOGADO (ADMIN OU RELATÓRIO), EXIBE OS BOTÕES GERENCIAIS */}
+        {(telaAtiva === 'admin' || telaAtiva === 'relatorio') ? (
+          <>
+            <button 
+              onClick={() => setTelaAtiva('admin')}
+              style={{
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: telaAtiva === 'admin' ? '#3498db' : '#546e7a',
+                color: 'white',
+                transition: 'background 0.2s'
+              }}
+            >
+              👨‍🍳 Cozinha (Controle)
+            </button>
+
+            <button 
+              onClick={() => setTelaAtiva('relatorio')}
+              style={{
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: telaAtiva === 'relatorio' ? '#e67e22' : '#546e7a',
+                color: 'white',
+                transition: 'background 0.2s'
+              }}
+            >
+              📊 Financeiro (Relatório)
+            </button>
+
+            <button 
+              onClick={fecharPainelAdmin}
+              style={{
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: '#d35400',
+                color: 'white',
+                transition: 'background 0.2s'
+              }}
+            >
+              🔒 Sair e Trancar
+            </button>
+          </>
         ) : (
-          // SE ESTIVER NA TELA DO CLIENTE, PEDE A SENHA AO CLICAR
+          // SE ESTIVER NA TELA DO CLIENTE, PEDE A SENHA AO CLICAR EM ADMINISTRAÇÃO
           <button 
             onClick={tentarAcessarAdmin}
             style={{
@@ -95,7 +131,9 @@ export default function App() {
 
       {/* ÁREA ONDE AS TELAS SÃO EXIBIDAS */}
       <main>
-        {telaAtiva === 'cliente' ? <PaginaCliente /> : <PaginaControleVendas />}
+        {telaAtiva === 'cliente' && <PaginaCliente />}
+        {telaAtiva === 'admin' && <PaginaControleVendas />}
+        {telaAtiva === 'relatorio' && <PaginaRelatorioVendas />} {/* 🌟 3. RENDERIZAÇÃO DA NOVA TELA */}
       </main>
 
     </div>

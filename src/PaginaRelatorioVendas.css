@@ -1,0 +1,109 @@
+.relatorio-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #334155;
+}
+
+
+.relatorio-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.relatorio-header h1 {
+  margin: 0 0 10px 0;
+  color: #1e293b;
+}
+
+.btn-atualizar-relatorio {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.2s;
+}
+
+.btn-atualizar-relatorio:hover {
+  background-color: #2980b9;
+}
+
+.relatorio-cards-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.card-relatorio {
+  flex: 1;
+  min-width: 250px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-relatorio h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.valor-destaque { font-size: 2rem; font-weight: bold; margin: 0 0 5px 0; color: #2c3e50; }
+.valor-sucesso { font-size: 2rem; font-weight: bold; margin: 0 0 5px 0; color: #2ecc71; }
+.valor-alerta { font-size: 2rem; font-weight: bold; margin: 0 0 5px 0; color: #f39c12; }
+
+.tabela-responsiva {
+  width: 100%;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.tabela-relatorio {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tabela-relatorio th, .tabela-relatorio td {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tabela-relatorio th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.linha-pendente { background-color: #fffdf9; }
+.linha-finalizada { background-color: #fafdfb; }
+
+.lista-pizzas-tabela {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
+.coluna-preco {
+  font-weight: bold;
+}
+
+.valor-pago {
+  color: #27ae60;
+}
+
+.relatorio-loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+}

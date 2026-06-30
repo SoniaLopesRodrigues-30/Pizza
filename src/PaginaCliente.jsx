@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaCliente.css'
-
+import './PaginaRelatorioVendas.css'
+import './PaginaCliente.css'
 
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos', preco: 35.00 },
@@ -12,13 +13,12 @@ const CARDAPIO_PIZZAS = [
   { id: 6, sabor: 'Calabresa', preco: 35.00 }
 ]
 
-// 1. LISTA FIXA DE VENDEDORES (Edite ou adicione nomes aqui)
-const VENDEDORES = ['Adriana (Drica)','Ângela',  'Katia', 'Nega', 'Rose','Sérgio','Sônia','Suelena' ]
+// 1. LISTA FIXA DE VENDEDORES
+const VENDEDORES = ['Adriana (Drica)','Ângela', 'Katia', 'Nega', 'Rose','Sérgio','Sônia','Suelena']
 
 export default function PaginaCliente() {
   const [nome, setNome] = useState('')
-  const [telefone, setTelefone] = useState('')
-  const [vendedor, setVendedor] = useState('') // Começa vazio para forçar a escolha  
+  const [vendedor, setVendedor] = useState('') 
   const [quantidades, setQuantidades] = useState(
     CARDAPIO_PIZZAS.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {})
   )
@@ -35,7 +35,7 @@ export default function PaginaCliente() {
   const precoUnitarioAtual = totalItens >= 4 ? 32.50 : 35.00
   const valorTotalExibicao = totalItens * precoUnitarioAtual
 
-    async function EnviarPedidoCliente(e) {
+  async function EnviarPedidoCliente(e) {
     e.preventDefault()
     
     const itensSelecionados = CARDAPIO_PIZZAS
@@ -51,17 +51,18 @@ export default function PaginaCliente() {
       return alert('Por favor, adicione pelo menos 1 pizza ao seu pedido!')
     }
 
-    if (!nome || !vendedor ) {
+    if (!nome || !vendedor) {
       return alert('Por favor, preencha todos os campos de identificação!')
     }
 
     const valorTotalBanco = itensSelecionados.reduce((acc, item) => acc + (item.preco_unitario * item.quantidade), 0)
 
-    // 1. Salva o Cliente incluindo o campo telefone
+    // 1. Salva o Cliente (apenas nome e vendedor)
     const { data: clienteData, error: errC } = await supabase
       .from('clientes')
-      .insert([{ nome, vendedor, telefone }]) // Campo adicionado aqui
+      .insert([{ nome, vendedor }])
       .select(); 
+    
     if (errC) return alert('Erro ao salvar os dados: ' + errC.message);
     if (!clienteData || clienteData.length === 0) return alert('Erro: Cliente não foi retornado pelo banco.');
     
@@ -94,19 +95,16 @@ export default function PaginaCliente() {
     alert('🍕 Pedido cadastrado com sucesso!')
     
     setNome('')    
-    setTelefone('') // Limpa o telefone
     setVendedor('') 
     setQuantidades(CARDAPIO_PIZZAS.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {}))
   }
 
-
-      return (
+  return (
     <div className="cliente-page">
       <div className="banner-pizzaria">
         <img src="/logoCentro.png" alt="Logo Pizza Solidária" className="logo-pizzaria" />              
       </div>
 
-      {/* 🌟 NOVO BLOCO DO FOLDER DE ANÚNCIO */}
       <div className="folder-anuncio-container">
         <div className="folder-card">          
           <img 
@@ -129,7 +127,6 @@ export default function PaginaCliente() {
               <input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Digite seu nome aqui!" required />
             </div>            
 
-            
             <div className="input-group">
               <label>Vendedor responsável:</label>
               <select 
@@ -181,7 +178,6 @@ export default function PaginaCliente() {
             ))}
           </div>
 
-          {/* BLOCO DE RESUMO DOS TOTAIS */}
           {totalItens > 0 && (
             <div className="resumo-pedido-container" style={{
               backgroundColor: '#fff',

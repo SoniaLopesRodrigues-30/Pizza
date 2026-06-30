@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import './PaginaControleVendas.css'
 
-
 // Cardápio de referência sincronizado com a PaginaCliente
 const CARDAPIO_PIZZAS = [
   { id: 1, sabor: '4 Queijos' },
@@ -16,7 +15,7 @@ const CARDAPIO_PIZZAS = [
 export default function PaginaControleVendas() {
   const [pedidos, setPedidos] = useState([])
   const [carregando, setCarregando] = useState(true)
-  const [busca, setBusca] = useState('') // 🌟 1. ESTADO PARA A BUSCA
+  const [busca, setBusca] = useState('') 
 
   // BUSCAR PEDIDOS E SEUS DETALHES RELACIONADOS
   async function buscarPedidos() {
@@ -29,7 +28,7 @@ export default function PaginaControleVendas() {
         total,
         status,
         criado_em,
-        clientes ( nome, telefone, vendedor ),
+        clientes ( nome, vendedor ),
         itens_pedido ( quantidade, pizza_id )
       `)
       .order('criado_em', { ascending: false })
@@ -76,13 +75,13 @@ export default function PaginaControleVendas() {
     return pizza ? pizza.sabor : `Sabor #${pizzaId}`
   }
 
-  // 🌟 2. FILTRAGEM DINÂMICA PELO NOME DO CLIENTE
+  // FILTRAGEM DINÂMICA PELO NOME DO CLIENTE
   const pedidosFiltrados = pedidos.filter(pedido => {
     const nomeCliente = pedido.clientes?.nome?.toLowerCase() || ''
     return nomeCliente.includes(busca.toLowerCase())
   })
 
-  // FATURAMENTO TOTAL ACUMULADO (Baseado apenas nos pedidos filtrados ou no total geral, aqui mantido sobre o total geral)
+  // FATURAMENTO TOTAL ACUMULADO
   const faturamentoTotal = pedidos.reduce((acc, p) => acc + Number(p.total), 0)
 
   if (carregando) return <div className="controle-loading">Carregando Controle de Vendas... 📈</div>
@@ -102,7 +101,7 @@ export default function PaginaControleVendas() {
           <span>Total de {pedidos.length} pedidos finalizados ou em andamento</span>
         </div>
 
-        {/* 🌟 3. CAMPO VISUAL DE BUSCA PELO NOME */}
+        {/* CAMPO VISUAL DE BUSCA PELO NOME */}
         <div className="busca-container" style={{ marginBottom: '25px' }}>
           <input
             type="text"
@@ -155,22 +154,15 @@ export default function PaginaControleVendas() {
                   <span className="venda-total">R$ {Number(pedido.total).toFixed(2)}</span>
                   
                   <div className="venda-acoes">
-                    {/* Passo 1: O pedido chegou */}
+                    {/* Passo 1: O pedido chegou como "Recebido" e vai para "Em Processo" */}
                     {pedido.status === 'Recebido' && (
                       <button onClick={() => alterarStatus(pedido.id, 'Em Processo')} className="btn-controle preparo">
-                        👨‍🍳 Em processo
+                        👨‍🍳 Em Processo
                       </button>
                     )}
                     
-                    {/* Passo 2: O pedido está sendo feito e agora ficou pronto na cozinha */}
-                    {pedido.status === 'Em Preparo' && (
-                      <button onClick={() => alterarStatus(pedido.id, 'Pronto para Entrega')} className="btn-controle pronto">
-                        📦 Em andamento
-                      </button>
-                    )}
-                    
-                    {/* Passo 3: O NOVO BOTÃO - O motoboy ou atendente entregou o pedido */}
-                    {pedido.status === 'Pronto para Entrega' && (
+                    {/* Passo 2: O pedido está "Em Processo" e será "Finalizado" */}
+                    {pedido.status === 'Em Processo' && (
                       <button 
                         onClick={() => alterarStatus(pedido.id, 'Finalizado')} 
                         className="btn-controle"
@@ -185,14 +177,14 @@ export default function PaginaControleVendas() {
                           cursor: 'pointer'
                         }}
                       >
-                        🛵Entregue
+                        🛵 Finalizado / Entregue
                       </button>
                     )}
                     
-                    {/* Passo 4: Fim do fluxo */}
+                    {/* Passo 3: Fim do fluxo */}
                     {pedido.status === 'Finalizado' && (
                       <span className="venda-concluida" style={{ color: '#27ae60', fontWeight: 'bold' }}>
-                        Entregue / Concluído 🎉
+                        Concluído 🎉
                       </span>
                     )}
                   </div>
