@@ -4,7 +4,8 @@ import PaginaControleVendas from './PaginaControleVendas.jsx'
 import PaginaRelatorioVendas from './PaginaRelatorioVendas.jsx' 
 
 export default function App() {
-  const [telaAtiva, setTelaAtiva] = useState('relatorio')
+  // CORREÇÃO: Alterado de 'relatorio' para 'cliente' para abrir por padrão
+  const [telaAtiva, setTelaAtiva] = useState('cliente')
 
   const SENHA_ADMIN = 'pizza123'
 
@@ -13,7 +14,7 @@ export default function App() {
     const senhaDigitada = prompt('🔒 Acesso Restrito! Digite a senha de administrador:')
     
     if (senhaDigitada === SENHA_ADMIN) {
-      setTelaAtiva('admin') // Entra direto no controle de vendas
+      setTelaAtiva('admin') // Entra direto no controle de vendas ao acertar
     } else if (senhaDigitada !== null) {
       alert('❌ Senha inválida! Acesso negado.')
     }
@@ -53,8 +54,7 @@ export default function App() {
         >
           🍕 Dados do Pedido (Cliente)
         </button>
-
-        {/* 🌟 2. SE ESTIVER LOGADO (ADMIN OU RELATÓRIO), EXIBE OS BOTÕES GERENCIAIS */}
+        {/* 🌟 SE ESTIVER LOGADO (ADMIN OU RELATÓRIO), EXIBE OS BOTÕES GERENCIAIS */}
         {(telaAtiva === 'admin' || telaAtiva === 'relatorio') ? (
           <>
             <button 
@@ -133,7 +133,7 @@ export default function App() {
       <main>
         {telaAtiva === 'cliente' && <PaginaCliente />}
         {telaAtiva === 'admin' && <PaginaControleVendas />}
-        {telaAtiva === 'relatorio' && <PaginaRelatorioVendas />} {/* 🌟 3. RENDERIZAÇÃO DA NOVA TELA */}
+        {telaAtiva === 'relatorio' && <PaginaRelatorioVendas />}
       </main>
 
     </div>

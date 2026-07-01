@@ -50,6 +50,23 @@ export default function PaginaRelatorioVendas() {
   const pedidosEntregues = pedidos.filter(p => p.status === 'Finalizado')
   const pedidosEmProcesso = pedidos.filter(p => p.status === 'Em Processo' || p.status === 'Recebido')
 
+// 🍕 CÁLCULO DA QUANTIDADE DE PIZZAS POR SABOR
+ const contagemSabores = pedidos.reduce((acc, pedido) => {
+  // Ignora pedidos cancelados, se houver. Se quiser contar apenas os entregues, mude para: if (pedido.status !== 'Finalizado') return acc;
+  
+  pedido.itens_pedido?.forEach(item => {
+    const nomeSabor = obterNomeSabor(item.pizza_id)
+    acc[nomeSabor] = (acc[nomeSabor] || 0) + item.quantidade
+  })
+  return acc
+}, {})
+
+// 📊 TOTAL GERAL DE PIZZAS VENDIDAS
+const totalPizzasVendidas = Object.values(contagemSabores).reduce((a, b) => a + b, 0)
+
+
+
+
   // 💰 CÁLCULOS FINANCEIROS
   const faturamentoEntregue = pedidosEntregues.reduce((acc, p) => acc + Number(p.total), 0)
   const faturamentoPendente = pedidosEmProcesso.reduce((acc, p) => acc + Number(p.total), 0)

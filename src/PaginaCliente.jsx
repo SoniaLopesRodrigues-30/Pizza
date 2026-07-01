@@ -18,6 +18,7 @@ const VENDEDORES = ['Adriana (Drica)','Ângela', 'Katia', 'Nega', 'Rose','Sérgi
 
 export default function PaginaCliente() {
   const [nome, setNome] = useState('')
+  const [telefone, setTelefone] = useState('')
   const [vendedor, setVendedor] = useState('') 
   const [quantidades, setQuantidades] = useState(
     CARDAPIO_PIZZAS.reduce((acc, p) => ({ ...acc, [p.id]: 0 }), {})
