@@ -2,9 +2,11 @@ import { useState } from 'react'
 import PaginaCliente from './PaginaCliente.jsx'
 import PaginaControleVendas from './PaginaControleVendas.jsx'
 import PaginaRelatorioVendas from './PaginaRelatorioVendas.jsx' 
+import PaginaRelatorioInsumos from './PaginaRelatorioInsumos.jsx'
+import PaginaCadastroProdutos from './PaginaCadastroProdutos.jsx' // 🌟 Nova importação
 
 export default function App() {
-  // CORREÇÃO: Alterado de 'relatorio' para 'cliente' para abrir por padrão
+  // Abre por padrão na tela do cliente
   const [telaAtiva, setTelaAtiva] = useState('cliente')
 
   const SENHA_ADMIN = 'pizza123'
@@ -14,7 +16,7 @@ export default function App() {
     const senhaDigitada = prompt('🔒 Acesso Restrito! Digite a senha de administrador:')
     
     if (senhaDigitada === SENHA_ADMIN) {
-      setTelaAtiva('admin') // Entra direto no controle de vendas ao acertar
+      setTelaAtiva('admin') // Entra direto na cozinha ao acertar a senha
     } else if (senhaDigitada !== null) {
       alert('❌ Senha inválida! Acesso negado.')
     }
@@ -24,6 +26,9 @@ export default function App() {
   const fecharPainelAdmin = () => {
     setTelaAtiva('cliente')
   }
+
+  // CORREÇÃO: Incluída a nova tela 'produtos' na lista permitida de gerenciamento
+  const ehAdministrador = ['admin', 'relatorio', 'insumos', 'produtos'].includes(telaAtiva)
 
   return (
     <div className="app-main-wrapper" style={{ fontFamily: 'sans-serif' }}>
@@ -54,8 +59,8 @@ export default function App() {
         >
           🍕 Dados do Pedido (Cliente)
         </button>
-        {/* 🌟 SE ESTIVER LOGADO (ADMIN OU RELATÓRIO), EXIBE OS BOTÕES GERENCIAIS */}
-        {(telaAtiva === 'admin' || telaAtiva === 'relatorio') ? (
+        {/* 🌟 SE ESTIVER LOGADO EM QUALQUER TELA ADM, EXIBE OS BOTÕES GERENCIAIS */}
+        {ehAdministrador ? (
           <>
             <button 
               onClick={() => setTelaAtiva('admin')}
@@ -89,6 +94,41 @@ export default function App() {
               }}
             >
               📊 Financeiro (Relatório)
+            </button>
+
+            <button 
+              onClick={() => setTelaAtiva('insumos')}
+              style={{
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: telaAtiva === 'insumos' ? '#2ecc71' : '#546e7a',
+                color: 'white',
+                transition: 'background 0.2s'
+              }}
+            >
+              📦 Insumos Gastos
+            </button>
+
+            {/* 🌟 NOVO BOTÃO: CADASTRO DE PRODUTOS BASE */}
+            <button 
+              onClick={() => setTelaAtiva('produtos')}
+              style={{
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: telaAtiva === 'produtos' ? '#9b59b6' : '#546e7a',
+                color: 'white',
+                transition: 'background 0.2s'
+              }}
+            >
+              ➕ Cadastrar Insumo
             </button>
 
             <button 
@@ -130,10 +170,12 @@ export default function App() {
       </nav>
 
       {/* ÁREA ONDE AS TELAS SÃO EXIBIDAS */}
-      <main>
+      <main style={{ padding: '20px' }}>
         {telaAtiva === 'cliente' && <PaginaCliente />}
         {telaAtiva === 'admin' && <PaginaControleVendas />}
         {telaAtiva === 'relatorio' && <PaginaRelatorioVendas />}
+        {telaAtiva === 'insumos' && <PaginaRelatorioInsumos />}
+        {telaAtiva === 'produtos' && <PaginaCadastroProdutos />} {/* 🌟 RENDERIZAÇÃO DA NOVA TELA */}
       </main>
 
     </div>
