@@ -16,6 +16,7 @@ export default function PaginaControleVendas() {
   const [pedidos, setPedidos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [busca, setBusca] = useState('') 
+  const [limpando, setLimpando] = useState(false)
 
   // BUSCAR PEDIDOS E SEUS DETALHES RELACIONADOS
   async function buscarPedidos() {
@@ -75,6 +76,48 @@ export default function PaginaControleVendas() {
     return pizza ? pizza.sabor : `Sabor #${pizzaId}`
   }
 
+  // 🌟 FUNÇÃO QUE DELETA TODOS OS PEDIDOS LOGO APÓS DUPLA CONFIRMAÇÃO
+  async function limparTodosOsPedidos() {
+    const confirmarPrimeiro = window.confirm(
+      "🚨 ALERTA GERAL: Você tem certeza absoluta de que deseja APAGAR TODOS os pedidos cadastrados no sistema?"
+    )
+    if (!confirmarPrimeiro) return
+
+    const confirmarSegundo = window.confirm(
+      "⚠️ ATENÇÃO: Esta ação vai zerar o painel da cozinha, o caixa e todo o faturamento acumulado de forma definitiva! Confirma mesmo?"
+    )
+    if (!confirmarSegundo) return
+
+    setLimpando(true)
+
+    // 1. Limpa os itens de todos os pedidos primeiro (evita erro de foreign key)
+    const { error: erroItens } = await supabase
+      .from('itens_pedido')
+      .delete()
+      .gte('id', 0)
+
+    if (erroItens) {
+      alert('❌ Erro ao limpar itens dos pedidos: ' + erroItens.message)
+      setLimpando(false)
+      return
+    }
+
+    // 2. Limpa a tabela principal de pedidos
+    const { error: erroPedidos } = await supabase
+      .from('pedidos')
+      .delete()
+      .gte('id', 0)
+
+    setLimpando(false)
+
+    if (erroPedidos) {
+      alert('❌ Erro ao limpar o histórico de pedidos: ' + erroPedidos.message)
+    } else {
+      alert('🗑️ Todos os pedidos foram apagados e o painel foi zerado com sucesso!')
+      buscarPedidos()
+    }
+  }
+
   // FILTRAGEM DINÂMICA PELO NOME DO CLIENTE
   const pedidosFiltrados = pedidos.filter(pedido => {
     const nomeCliente = pedido.clientes?.nome?.toLowerCase() || ''
@@ -106,13 +149,35 @@ export default function PaginaControleVendas() {
   // =================================================================
 
   if (carregando) return <div className="controle-loading">Carregando Controle de Vendas... 📈</div>
-
   return (
     <div className="controle-page">
-      <div className="controle-header">
-        <h1>📊 Painel de Controle de Vendas</h1>
-        <p>Acompanhe pedidos, mude o status da produção e monitore o caixa</p>
+      {/* CABEÇALHO COM TÍTULO E BOTÃO DE LIMPEZA EM LINHA */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '15px' }}>
+        <div>
+          <h1 style={{ margin: 0, color: '#1e293b' }}>📊 Painel de Controle de Vendas</h1>
+          <p style={{ margin: '5px 0 0 0', color: '#64748b' }}>Acompanhe pedidos, mude o status da produção e monitore o caixa</p>
+        </div>
+        
+        <button
+          onClick={limparTodosOsPedidos}
+          disabled={limpando}
+          style={{
+            padding: '12px 18px',
+            fontSize: '0.95rem',
+            fontWeight: 'bold',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: limpando ? 'not-allowed' : 'pointer',
+            backgroundColor: '#e74c3c',
+            color: 'white',
+            boxShadow: '0 2px 4px rgba(231, 76, 60, 0.2)',
+            transition: 'background 0.2s',
+          }}
+        >
+          {limpando ? 'Limpando Painel...' : '🗑️ Limpar Todos os Pedidos'}
+        </button>
       </div>
+
       <div className="controle-container">
         {/* CARD DO CAIXA E FATURAMENTO */}
         <div className="card-caixa">

@@ -8,8 +8,6 @@ export default function PaginaRelatorioInsumos() {
   // Função que chama o cálculo de gastos direto do banco de dados
   async function carregarRelatorioInsumos() {
     setCarregando(true)
-    
-    // Executa a função RPC criada no SQL Editor
     const { data, error } = await supabase.rpc('calcular_total_insumos')
 
     if (error) {
@@ -20,10 +18,14 @@ export default function PaginaRelatorioInsumos() {
     setCarregando(false)
   }
 
-  // Carrega os dados sempre que a página for aberta
   useEffect(() => {
     carregarRelatorioInsumos()
   }, [])
+
+  // 🌟 FUNÇÃO QUE DISPARA A IMPRESSÃO DO NAVEGADOR
+  const imprimirRelatorio = () => {
+    window.print()
+  }
 
   if (carregando) {
     return (
@@ -33,16 +35,52 @@ export default function PaginaRelatorioInsumos() {
     )
   }
   return (
-    <div style={{ padding: '25px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#fff', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', fontFamily: 'sans-serif' }}>
+    <div className="relatorio-print-container" style={{ padding: '25px', maxWidth: '600px', margin: '0 auto', backgroundColor: '#fff', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', fontFamily: 'sans-serif' }}>
+      
+      {/* 🌟 REGRAS CSS ESPECÍFICAS PARA A IMPRESSÃO */}
+      <style>{`
+        @media print {
+          /* Esconde a barra de navegação superior do App.jsx e os botões da página */
+          nav, .btn-acao-relatorio, button {
+            display: none !important;
+          }
+          /* Remove sombras e margens externas para centralizar na folha A4 */
+          .relatorio-print-container {
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+          }
+          /* Garante que o fundo fique totalmente branco e as letras pretas */
+          body {
+            background-color: #fff !important;
+            color: #000 !important;
+          }
+        }
+      `}</style>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '2px solid #34495e', paddingBottom: '10px' }}>
         <h2 style={{ color: '#2c3e50', margin: 0 }}>📊 Relatório Geral de Insumos Gastos</h2>
-        <button 
-          onClick={carregarRelatorioInsumos}
-          style={{ padding: '6px 12px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          🔄 Atualizar
-        </button>
+        
+        {/* CONTAINER DE BOTÕES (VÃO SUMIR NO PAPEL) */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={carregarRelatorioInsumos}
+            style={{ padding: '6px 12px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            🔄 Atualizar
+          </button>
+          
+          {/* 🌟 NOVO BOTÃO DE IMPRESSÃO */}
+          <button 
+            onClick={imprimirRelatorio}
+            style={{ padding: '6px 12px', backgroundColor: '#e67e22', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            🖨️ Imprimir Relatório
+          </button>
+        </div>
       </div>
+      
       <p style={{ color: '#7f8c8d', fontSize: '0.9rem', marginBottom: '20px' }}>
         Abaixo está a soma total de materiais utilizados considerando <b>todos os pedidos</b> cadastrados no sistema.
       </p>
@@ -60,7 +98,7 @@ export default function PaginaRelatorioInsumos() {
             </thead>
             <tbody>
               {insumos.map((item, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid #edf2f7', transition: 'background 0.2s' }}>
+                <tr key={idx} style={{ borderBottom: '1px solid #edf2f7' }}>
                   <td style={{ padding: '12px 10px', color: '#1e293b', fontWeight: '500' }}>
                     {item.ingrediente}
                   </td>
